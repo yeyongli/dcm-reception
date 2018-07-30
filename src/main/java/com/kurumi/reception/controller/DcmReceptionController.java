@@ -1,9 +1,12 @@
 package com.kurumi.reception.controller;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +27,7 @@ import com.kurumi.reception.util.SendMSMQUtil;
 public class DcmReceptionController {
 	private static final Logger log = LoggerFactory.getLogger(DcmReceptionController.class);
 	
+	
 	@Value("${patient.json}")
 	private String PATIENT_JSON;
 
@@ -36,8 +40,11 @@ public class DcmReceptionController {
 	@Value("${full.name.msmq}")
 	private String FULL_NAME_MSMQ;
 	
+	@Value("${full.name.msmq.patientQueue}")
+	private String FULL_NAME_MSMQ_PATIENTQUEUE;
+	
 	/**
-	 * 处理dcm文件
+	 * instanceTag的值添加到msmq队列里面
 	 * 
 	 * @param file
 	 * @param studyUid
@@ -46,35 +53,37 @@ public class DcmReceptionController {
 	 * @return
 	 */
 	@PostMapping
-	@RequestMapping("/handlerDcmTag")
-	public Result handlerDcmTag(MultipartFile file, HttpServletRequest request) {
+	@RequestMapping("/handlerInstanceTag")
+	public Result handlerInstanceTag(HttpServletRequest request) {
 		try {
-			 StringBuffer sb = new StringBuffer();
-			 sb.append("sessionId="+request.getParameter("sessionId")+"\r\n");
-			 sb.append("studyInstanceUID="+request.getParameter("studyInstanceUID")+"\r\n");
-			 sb.append("seriesInstanceUID="+request.getParameter("seriesInstanceUID")+"\r\n");
-			 sb.append("sOPInstanceUID="+request.getParameter("sOPInstanceUID")+"\r\n");
-			 sb.append("instanceNumber="+request.getParameter("instanceNumber")+"\r\n");
-			 sb.append("characterSet="+request.getParameter("characterSet")+"\r\n");
-			 sb.append("transferSyntaxUID="+request.getParameter("transferSyntaxUID")+"\r\n");
-			 sb.append("sOPClassUID="+request.getParameter("sOPClassUID")+"\r\n");
-			 sb.append("modality="+request.getParameter("modality")+"\r\n");
-			 sb.append("seriesNumber="+request.getParameter("seriesNumber")+"\r\n");
-			 sb.append("dcmFileStorageLocation="+request.getParameter("dcmFileStorageLocation")+"\r\n");
-			 sb.append("studyID="+request.getParameter("studyID")+"\r\n");
-			 sb.append("studyDate="+request.getParameter("studyDate")+"\r\n");
-			 sb.append("studyTime="+request.getParameter("studyTime")+"\r\n");
-			 sb.append("accessionNumber="+request.getParameter("accessionNumber"));
+			log.info("-------begin handlerInstanceTag方法: 接收instanceTag的值添加到MSQM--------");
+			Map <String, String> map = new HashMap<String, String>();
+			map.put("sessionId", request.getParameter("sessionId"));
+			map.put("studyInstanceUID", request.getParameter("studyInstanceUID"));
+			map.put("seriesInstanceUID", request.getParameter("seriesInstanceUID"));
+			map.put("sOPInstanceUID", request.getParameter("sOPInstanceUID"));
+			map.put("instanceNumber", request.getParameter("instanceNumber"));
+			map.put("characterSet", request.getParameter("characterSet"));
+			map.put("transferSyntaxUID", request.getParameter("transferSyntaxUID"));
+			map.put("sOPClassUID", request.getParameter("sOPClassUID"));
+			map.put("modality", request.getParameter("modality"));
+			map.put("seriesNumber", request.getParameter("seriesNumber"));
+			map.put("dcmFileStorageLocation", request.getParameter("dcmFileStorageLocation"));
+			map.put("studyID", request.getParameter("studyID"));
+			map.put("studyDate", request.getParameter("studyDate"));
+			map.put("studyTime", request.getParameter("studyTime"));
+			map.put("accessionNumber", request.getParameter("accessionNumber"));
+			map.put("numberFrame", request.getParameter("numberFrame"));
 			 
+			String jsonStr = JsonUtils.objectToJson(map);
 			//put data enter queue 
-			 SendMSMQUtil.putMessageQueue(FULL_NAME_MSMQ, "instance", 
-					 sb.toString(), UUID.randomUUID().toString());
+			 SendMSMQUtil.putMessageQueue(FULL_NAME_MSMQ, "instance", jsonStr, UUID.randomUUID().toString());
 			 
-			return new Result(true, "接收dicom信息成功!", null, 200);
+			return new Result(true, "接收instance信息成功!", null, 200);
 		} catch (Exception e) {
-			return new Result(false, "接收dicom信息异常!" + ExceptionUtil.getStackTrace(e), null, 500);
+			log.error("-------handlerInstanceTag方法: 接收instanceTag的值添加到MSQM异常: --------" + ExceptionUtil.getStackTrace(e));
+			return new Result(false, "接收instance信息异常!" + ExceptionUtil.getStackTrace(e), null, 500);
 		}
-		
 	}
 	
 	/**
@@ -88,17 +97,25 @@ public class DcmReceptionController {
 	@ResponseBody
 	public Result handlePatientInfo(Patient patient, HttpServletRequest request) {
 		try {
+			log.info("--------------begin handlePatientInfo方法: 患者信息添加到MSMQ队列里面-------------");
 			String patientJson = JsonUtils.objectToJson(patient);
-			SendMSMQUtil.putMessageQueue(FULL_NAME_MSMQ, "patientQueue", patientJson, UUID.randomUUID().toString());
-			return new Result(true, "处理patient信息成功!", null, 200);
+			
+			if (patient != null) {
+				SendMSMQUtil.putMessageQueue(FULL_NAME_MSMQ_PATIENTQUEUE, "patientQueue", patientJson, UUID.randomUUID().toString());
+				return new Result(true, "处理patient信息成功!", null, 200);
+			}
+			
+			log.warn("--------------begin handlePatientInfo方法: 患者信息添加到MSMQ队列里面------------- 接收到patient的参数为空!");
+			
+			return new Result(true, "patient参数为空!", null, 200);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("------ handlePatientInfo方法, 患者信息添加到MSMQ队列里面异常-----------" + ExceptionUtil.getStackTrace(e));
 			return new Result(false, "处理patient信息失败!", null, 500);
 		}
 	}
 
 	/**
-	 * 接收session列表信息
+	 * 接收session json字符串信息添加到MSMQ队列里面
 	 * 
 	 * @param request
 	 * @return
@@ -107,18 +124,24 @@ public class DcmReceptionController {
 	@ResponseBody
 	public Result handleSessionInfo(HttpServletRequest request) {
 		try {
+			log.info("-------begin handleSessionInfo方法: 接收session json字符串信息添加到MSMQ队列里面----------");
 			String sessionList = request.getParameter("sessionList");
-			SendMSMQUtil.putMessageQueue(FULL_NAME_MSMQ, "session", 
-					 sessionList, UUID.randomUUID().toString());
-			return new Result(true, "处理session信息成功!", null, 200);
+			
+			if(StringUtils.isNotBlank(sessionList)) {
+				SendMSMQUtil.putMessageQueue(FULL_NAME_MSMQ, "session", 
+						 sessionList, UUID.randomUUID().toString());
+				return new Result(true, "处理session信息成功!", null, 200);
+			}
+			
+			log.warn("--------handleSessionInfo方法, 接收session json字符串信息添加到MSMQ队列里面------- 接收到sessoinList参数为空");
+			
+			return new Result(false, "sessionList参数为空!", null, -1);
 		} catch (Exception e) {
+			e.printStackTrace();
+			log.error("------handleSessionInfo方法, 接收session json字符串信息添加到MSMQ队列里面异常----------:" + ExceptionUtil.getStackTrace(e));
 			return new Result(false, "处理session信息失败!", null, 500);
 		}
 	}
-	
-	
-	
-	
 	
 	
 	

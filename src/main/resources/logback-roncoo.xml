@@ -6,7 +6,7 @@
 	<!-- test文件路径 -->
 	<property name="TEST_FILE_PATH" value="c:/opt/roncoo/logs" />
 	<!-- pro文件路径 -->
-	<property name="PRO_FILE_PATH" value="/opt/roncoo/logs" />
+	<property name="PRO_FILE_PATH" value="c:/opt/roncoo/logs" />
 
 	<!-- 开发环境 -->
 	<springProfile name="dev">
@@ -16,7 +16,7 @@
 			</encoder>
 		</appender>
 		
-		<logger name="com.roncoo.education" level="debug"/>
+	<!-- <logger name="com.roncoo.education" level="debug"/> -->
 
 		<root level="info">
 			<appender-ref ref="CONSOLE" />

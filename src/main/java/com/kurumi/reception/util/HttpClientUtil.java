@@ -3,6 +3,7 @@ package com.kurumi.reception.util;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +35,6 @@ import org.apache.http.util.EntityUtils;
  *
  */
 public class HttpClientUtil {
-
 	/**
 	 * httpGet请求
 	 * @param url
@@ -45,6 +45,7 @@ public class HttpClientUtil {
 
 		// 创建Httpclient对象
 		CloseableHttpClient httpclient = HttpClients.createDefault();
+
 		String resultString = "";
 		CloseableHttpResponse response = null;
 		try {
@@ -59,6 +60,7 @@ public class HttpClientUtil {
 
 			// 创建http GET请求
 			HttpGet httpGet = new HttpGet(uri);
+
 			// 执行请求
 			response = httpclient.execute(httpGet);
 			// 判断返回状态是否为200
@@ -117,6 +119,7 @@ public class HttpClientUtil {
 			try {
 				response.close();
 			} catch (IOException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -124,54 +127,45 @@ public class HttpClientUtil {
 		return resultString;
 	}
 	
+
+	public static String doPost(String url) {
+		return doPost(url, null);
+	}
+	
+	
 	/**
-	 * post模拟表单上传文件
-	 * 
+	 * HttpPost请求
 	 * @param url
-	 * @param file
-	 * @param fileName
-	 * @param param
+	 * @param Map类型参数的请求
 	 * @return
 	 */
-	public static String doPostFile(String url, File file, String fileName, Map<String, Object> param) {
-		CloseableHttpClient httpClient = null;
+	public static String doPostJson(String url, Map<String, Object> param) {
+		// 创建Httpclient对象
+		CloseableHttpClient httpClient = HttpClients.createDefault();
+		CloseableHttpResponse response = null;
 		String resultString = "";
-		
 		try {
-			 httpClient = HttpClients.createDefault();
-			 HttpPost post = new HttpPost(url);
-			 MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-			 builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-			 builder.addBinaryBody("file", file, ContentType.DEFAULT_BINARY, fileName);
-			 ContentType contentType = ContentType.create(HTTP.PLAIN_TEXT_TYPE, HTTP.UTF_8);
-			 
-			 if (param != null) {
-				 for (String key : param.keySet()) {
-					 StringBody stringBody = new StringBody((String) param.get(key), contentType);
-					 builder.addPart(key, stringBody);
-				 }
-			 }
-			 
-			 HttpEntity entity = builder.build();
-			 post.setEntity(entity);
-			 HttpResponse response = httpClient.execute(post);
-			 resultString = EntityUtils.toString(response.getEntity(), "utf-8");
+			// 创建Http Post请求
+			HttpPost httpPost = new HttpPost(url);
+			StringEntity entity = new StringEntity(JsonUtils.objectToJson(param), Charset.forName("UTF-8"));
+			entity.setContentEncoding("UTF-8");    
+			entity.setContentType("application/json");
+			httpPost.setEntity(entity);
+			// 执行http请求
+			response = httpClient.execute(httpPost);
+			resultString = EntityUtils.toString(response.getEntity(), "utf-8");
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			if (httpClient != null) {
-				try {
-					httpClient.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+			try {
+				response.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
-		 return resultString;
-	}
-	
-	public static String doPost(String url) {
-		return doPost(url, null);
+
+		return resultString;
 	}
 	
 	/**
@@ -194,7 +188,6 @@ public class HttpClientUtil {
 			// 执行http请求
 			response = httpClient.execute(httpPost);
 			resultString = EntityUtils.toString(response.getEntity(), "utf-8");
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -208,4 +201,5 @@ public class HttpClientUtil {
 
 		return resultString;
 	}
+	
 }

@@ -1,6 +1,6 @@
 
 public class InstanceUrl {
-	//检查UID
+		//检查UID
 		private String studyInstanceUID;
 		//序列UID
 		private String seriesInstanceUID;

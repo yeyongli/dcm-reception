@@ -2,10 +2,11 @@ package com.kurumi.reception.entity;
 
 /**
  * dicom instance描述信息
- * @author h2oco2
- *
+ * 
+ * @author yeyongli
+ * 
  */
-public class DicomInstanceMessage {
+public class DicomInstanceMessage implements Cloneable{
 	private String sessionId;
 	//检查UID
 	private String studyInstanceUID;
@@ -28,19 +29,31 @@ public class DicomInstanceMessage {
 	
 	//dicom文件存储的位置
 	private String dcmFileStorageLocation;
+	
+	private String studyID;
+	private String studyDate;
+	private String studyTime;
+	private String accessionNumber;
+	
+	//图片存储的位置
+	private String pictureFileStorageLocation;
 	//处理状态
 	private Integer status;
 	//处理完结束状态 (成功,失败)
 	private Integer processedStatus;
-	//是否压缩 1.压缩, 2没有压缩
-	private Integer isCompression;
-	//压缩类型 1.高级jpg压缩, 2.jp2000压缩, 3.近无损压缩 0
-	private Integer compressionType;
+	private String patientKey;
+	//窗宽
+	private String ww;
+	//窗位
+	private String wl;
+	
+	private String numberFrame;
+	
+	private Integer frameIndex;
 	
 	public DicomInstanceMessage(String sessionId, String studyInstanceUID, String seriesInstanceUID, String sOPInstanceUID,
 			String instanceNumber, String characterSet, String transferSyntaxUID, String sOPClassUID, String modality,
-			String seriesNumber, String dcmFileStorageLocation, Integer status, Integer isCompression, 
-			Integer compressionType) {
+			String seriesNumber, String dcmFileStorageLocation, String studyID, String studyDate, String studyTime, String accessionNumber, String frameNumber) {
 		super();
 		this.sessionId = sessionId;
 		this.studyInstanceUID = studyInstanceUID;
@@ -53,10 +66,11 @@ public class DicomInstanceMessage {
 		this.modality = modality;
 		this.seriesNumber = seriesNumber;
 		this.dcmFileStorageLocation = dcmFileStorageLocation;
-		this.status = status;
-		this.processedStatus = processedStatus;
-		this.isCompression = isCompression;
-		this.compressionType = compressionType;
+		this.studyID = studyID;
+		this.studyDate = studyDate;
+		this.studyTime = studyTime;
+		this.accessionNumber = accessionNumber;
+		this.numberFrame = frameNumber;
 	}
 
 	public DicomInstanceMessage() {
@@ -167,24 +181,119 @@ public class DicomInstanceMessage {
 		this.sessionId = sessionId;
 	}
 
-	public Integer getIsCompression() {
-		return isCompression;
+	public String getPatientKey() {
+		return patientKey;
 	}
 
-	public void setIsCompression(Integer isCompression) {
-		this.isCompression = isCompression;
+	public void setPatientKey(String patientKey) {
+		this.patientKey = patientKey;
 	}
 
-	public Integer getCompressionType() {
-		return compressionType;
+	public String getPictureFileStorageLocation() {
+		return pictureFileStorageLocation;
 	}
 
-	public void setCompressionType(Integer compressionType) {
-		this.compressionType = compressionType;
+	public void setPictureFileStorageLocation(String pictureFileStorageLocation) {
+		this.pictureFileStorageLocation = pictureFileStorageLocation;
+	}
+
+	public String getStudyID() {
+		return studyID;
+	}
+
+	public void setStudyID(String studyID) {
+		this.studyID = studyID;
+	}
+
+	public String getStudyDate() {
+		return studyDate;
+	}
+
+	public void setStudyDate(String studyDate) {
+		this.studyDate = studyDate;
+	}
+
+	public String getStudyTime() {
+		return studyTime;
+	}
+
+	public void setStudyTime(String studyTime) {
+		this.studyTime = studyTime;
+	}
+
+	public String getAccessionNumber() {
+		return accessionNumber;
+	}
+
+	public void setAccessionNumber(String accessionNumber) {
+		this.accessionNumber = accessionNumber;
+	}
+	
+	public String getWw() {
+		return ww;
+	}
+
+	public void setWw(String ww) {
+		this.ww = ww;
+	}
+
+	public String getWl() {
+		return wl;
+	}
+
+	public void setWl(String wl) {
+		this.wl = wl;
 	}
 	
 	
 
+	public String getNumberFrame() {
+		return numberFrame;
+	}
+
+	public void setNumberFrame(String numberFrame) {
+		this.numberFrame = numberFrame;
+	}
+	
 	
 
+	public Integer getFrameIndex() {
+		return frameIndex;
+	}
+
+	public void setFrameIndex(Integer frameIndex) {
+		this.frameIndex = frameIndex;
+	}
+
+	@Override
+	public String toString() {
+		return "DicomInstanceMessage [sessionId=" + sessionId + ", studyInstanceUID=" + studyInstanceUID
+				+ ", seriesInstanceUID=" + seriesInstanceUID + ", sOPInstanceUID=" + sOPInstanceUID
+				+ ", instanceNumber=" + instanceNumber + ", characterSet=" + characterSet + ", transferSyntaxUID="
+				+ transferSyntaxUID + ", sOPClassUID=" + sOPClassUID + ", modality=" + modality + ", seriesNumber="
+				+ seriesNumber + ", dcmFileStorageLocation=" + dcmFileStorageLocation + ", studyID=" + studyID
+				+ ", studyDate=" + studyDate + ", studyTime=" + studyTime + ", accessionNumber=" + accessionNumber
+				+ ", pictureFileStorageLocation=" + pictureFileStorageLocation + ", status=" + status
+				+ ", processedStatus=" + processedStatus + ", patientKey=" + patientKey + ", ww=" + ww + ", wl=" + wl
+				+ ", numberFrame=" + numberFrame + "]";
+	}
+
+	
+	 @Override  
+	    public Object clone() {  
+		 DicomInstanceMessage in = null;  
+	        try{  
+	            in = (DicomInstanceMessage)super.clone();  
+	        }catch(CloneNotSupportedException e) {  
+	            e.printStackTrace();  
+	        }  
+	        return in;  
+	    } 
+	
+	
+
+	
 }
+
+
+

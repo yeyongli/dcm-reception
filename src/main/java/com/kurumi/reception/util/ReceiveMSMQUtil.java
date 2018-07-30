@@ -13,10 +13,14 @@ import ionic.Msmq.Queue;
 public class ReceiveMSMQUtil {
 	private static Logger log = LoggerFactory.getLogger(ReceiveMSMQUtil.class);
 	
-	static{
-		System.loadLibrary("MsmqJava64");
+	/*static{
+		try {
+			System.loadLibrary("MsmqJava64");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		//System.load("C:\\Users\\h2oco2\\Desktop\\MsmqJava.dll");
-	}
+	}*/
 	
 	public static Map<String, String> takeMessageQueue(String fullname) {
 		Map<String, String> map = new HashMap<>();
@@ -99,5 +103,6 @@ public class ReceiveMSMQUtil {
 		return map;
 	}
 	
-
+	
+	
 }

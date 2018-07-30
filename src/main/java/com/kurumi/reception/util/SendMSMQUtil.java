@@ -13,13 +13,14 @@ import ionic.Msmq.Queue;
 public class SendMSMQUtil {
 	private static Logger log = LoggerFactory.getLogger(SendMSMQUtil.class);
 	
-	static{
+/*	static{
 		//系统去加载MsmqJava默认在项目的根路径下面
 		System.loadLibrary("MsmqJava64");
 		//指定dll的加载路径
 		//System.load("C:\\Users\\h2oco2\\Desktop\\MsmqJava64.dll");
 	}
 	
+	*/
 	/**
 	 * 
 	 * @param fullname
